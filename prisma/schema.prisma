@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator docs {
+  provider = "node node_modules/prisma-docs-generator"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Candidates {
+  id           Int           @id @default(autoincrement())
+  name         String
+  applications Applications?
+}
+
+model Applications {
+  candidate       Candidates        @relation(fields: [candidateId], references: [id])
+  candidateId     Int               @id @unique
+  resume String?
+  applicationResponses ApplicationResponses[]
+}
+
+model ApplicationResponses {
+  id             Int          @id @default(autoincrement())
+  questions      Questions    @relation(fields: [questionId], references: [id])
+  questionId     Int          
+  userAnswer     String?
+  comment        String?
+  application   Applications @relation(fields: [applicationId], references: [candidateId])
+  applicationId Int
+  @@unique([questionId,applicationId], name: "app_info_unique_fks")
+}
+
+model Questions {
+  id              Int              @id @default(autoincrement())
+  question        String
+  applicationResponses ApplicationResponses[]
+}
